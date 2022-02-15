@@ -1,5 +1,7 @@
 class VDFValidator
 {
+    static #variables = {};
+
     static async registerForm(form)
     {
         const fn = (e) => {
@@ -65,7 +67,9 @@ class VDFValidator
     {
         const tokens = validator.split('-');
         const validatorName = tokens.shift();
-        const params = tokens;
+        const params = tokens.map(item => 
+            /^#/.test(item) ? this.#variables[item.substring(1)] : item
+        );
 
         return {
             validatorName,
@@ -76,6 +80,11 @@ class VDFValidator
     static defineFunction(name, fn)
     {
         VDFValidatorFunctions[name] = fn;
+    }
+
+    static defineVariable(name, value)
+    {
+        this.#variables[name] = value;
     }
 }
 
