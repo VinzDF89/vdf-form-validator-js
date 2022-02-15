@@ -24,11 +24,20 @@ class VDFValidator
     {
         //Get all fields of the form that have .vfield-* class
         const fields = [...form.querySelectorAll('[class*=vfield-]')];
+        const errors = [];
         for (const f of fields) {
             const validators = VDFValidator.getVDFValidators(f);
             for (const v of validators) {
-                await VDFValidator.validate(f, v);
+                try {
+                    await VDFValidator.validate(f, v);
+                } catch (e) {
+                    errors.push(e);
+                }
             }
+        }
+
+        if (errors.length) {
+            throw new Error(errors);
         }
     }
 
@@ -44,11 +53,11 @@ class VDFValidator
         return new Promise((resolve, reject) => {
             const {validatorName, params} = VDFValidator.parseValidator(validator);
 
-            if (typeof VDFValidatorFunctions[validatorName] !== 'function') {
+            if (typeof VDFValidatorFunctions[validatorName] === 'function') {
+                VDFValidatorFunctions[validatorName](field, params, resolve, reject);
+            } else {
                 reject(`Undefined validator "${validatorName}"`);
             }
-
-            VDFValidatorFunctions[validatorName](field, params, resolve, reject);
         });
     }
 
@@ -62,6 +71,11 @@ class VDFValidator
             validatorName,
             params
         };
+    }
+
+    static defineFunction(name, fn)
+    {
+        VDFValidatorFunctions[name] = fn;
     }
 }
 
