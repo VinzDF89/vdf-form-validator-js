@@ -33,7 +33,7 @@
                         return VDFValidator.validate(field, 'min-' + minLength)
                     })
                     .then(function() {
-                        /[!$#-]+/.test(field.value.trim()) ? resolve() : reject('Password not valid!');
+                        /(?=.*[a-zA-Z]+)(?=.*[0-9]+)(?=.*[!$#-])+/.test(field.value.trim()) ? resolve() : reject('Password not valid!');
                     })
                     .catch(function(e) {
                         reject('The password requires at least ' + minLength + ' characters!');
@@ -52,24 +52,26 @@
 
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
-                            <input type="text" id="username" name="username" class="vfield-required vfield-min-3 vfield-max-8 form-control">
-                            <div class="verror-username-required invalid-feedback">
-                                User name is required!
-                            </div>
-                            <div class="verror-username-min-3 invalid-feedback">
-                                Please insert at least 3 characters!
-                            </div>
-                            <div class="verror-username-max-8 invalid-feedback">
-                                Please insert at least 3 characters!
-                            </div>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                class="vfield-required vfield-min-3 vfield-max-8 form-control"
+                                data-verror-required="User name is required!"
+                                data-verror-min="Please insert at least 3 characters!"
+                                data-verror-max="Please insert up to 8 characters!"
+                            >
                         </div>
 
                         <div class="mb-3">
                             <label for="email" class="form-label">E-mail</label>
-                            <input type="text" id="email" name="email" class="vfield-email form-control">
-                            <div class="verror-email invalid-feedback">
-                                Please insert a valid e-mail address!
-                            </div>
+                            <input 
+                                type="text" 
+                                id="email" 
+                                name="email" 
+                                class="vfield-required vfield-email form-control"
+                                data-verror="Please insert a valid e-mail address!"
+                            >
                         </div>
 
                         <div class="mb-3">

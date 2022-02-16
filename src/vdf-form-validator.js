@@ -22,9 +22,10 @@ class VDFValidator
                     VDFValidator.runEvent('onValidated', e.target);
                     alert('Form validated!');
                 })
-                .catch(errors => {
-                    console.log('Form validation failed!', errors);
-                    VDFValidator.runEvent('onFailure', e.target, errors);
+                .catch(error => {
+                    console.log('Form validation failed!', error);
+                    VDFValidator.showErrors(error.message);
+                    VDFValidator.runEvent('onFailure', e.target, error);
                 })
                 .finally(() => {
                     VDFValidator.runEvent('onCompletion', e.target);
@@ -38,20 +39,23 @@ class VDFValidator
     {
         //Get all fields of the form that have .vfield-* class
         const fields = [...form.querySelectorAll('[class*=vfield-]')];
-        const errors = [];
+        const errors = {};
         for (const f of fields) {
             const validators = VDFValidator.getVDFValidators(f);
             for (const v of validators) {
                 try {
                     await VDFValidator.validate(f, v);
                 } catch (e) {
-                    errors.push(e);
+                    if (!errors.hasOwnProperty(f.name)) {
+                        errors[f.name] = [];
+                    }
+                    errors[f.name].push(v);
                 }
             }
         }
 
-        if (errors.length) {
-            throw new Error(errors);
+        if (Object.keys(errors).length) {
+            throw new Error(JSON.stringify(errors));
         }
     }
 
@@ -73,6 +77,14 @@ class VDFValidator
                 reject(`Undefined validator "${validatorName}"`);
             }
         });
+    }
+
+    static showErrors(data)
+    {
+        const errors = JSON.parse(data);
+        for (const [field, error] of Object.entries(errors)) {
+            console.log(error);
+        }
     }
 
     static parseValidator(validator)
