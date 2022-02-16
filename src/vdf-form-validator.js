@@ -1,5 +1,10 @@
 class VDFValidator
 {
+    static onBeforeValidation;
+    static onValidated;
+    static onFailure;
+    static onCompletion;
+
     static #variables = {};
 
     static async registerForm(form)
@@ -7,15 +12,22 @@ class VDFValidator
         const fn = (e) => {
             e.preventDefault();
 
+            VDFValidator.runEvent('onBeforeValidation', e.target);
+
             VDFValidator.validateForm(e.target)
                 .then(() => {
                     // form.removeEventListener('submit', fn);
                     // form.submit();
                     // form.addEventListener('submit', fn);
+                    VDFValidator.runEvent('onValidated', e.target);
                     alert('Form validated!');
                 })
-                .catch(error => {
-                    console.log('Form validation failed!', error);
+                .catch(errors => {
+                    console.log('Form validation failed!', errors);
+                    VDFValidator.runEvent('onFailure', e.target, errors);
+                })
+                .finally(() => {
+                    VDFValidator.runEvent('onCompletion', e.target);
                 });
         }
 
@@ -85,6 +97,13 @@ class VDFValidator
     static defineVariable(name, value)
     {
         this.#variables[name] = value;
+    }
+
+    static runEvent(name, form, errors)
+    {
+        if (this[name]) {
+            this[name](form, errors);
+        }
     }
 }
 
