@@ -83,7 +83,19 @@ class VDFValidator
     {
         const errors = JSON.parse(data);
         for (const [field, error] of Object.entries(errors)) {
-            console.log(error);
+            const input = document.querySelector(`[name=${field}]`);
+
+            if (input) {
+                input.style.border = '1px solid red';
+                
+                const msg = input.getAttribute(`data-verror-${error}`) ?? input.getAttribute(`data-verror`);
+                if (msg) {
+                    const msgElement = document.createElement('span');
+                    msgElement.style.color = 'red';
+                    msgElement.innerHTML = msg;
+                    input.parentNode.insertBefore(msgElement, input.nextSibling);
+                }
+            }
         }
     }
 
