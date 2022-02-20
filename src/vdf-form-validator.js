@@ -6,15 +6,22 @@ class VDFValidator
     static onCompletion;
 
     static #variables = {};
+    static #changed = [];
 
-    static async registerForm(form)
+    static registerForm(form)
     {
-        const fn = (e) => {
+        this.#registerFormEvents(form);
+        this.#registerInputEvents(form);
+    }
+
+    static #registerFormEvents(form)
+    {
+        const formFn = (e) => {
             e.preventDefault();
 
             VDFValidator.runEvent('onBeforeValidation', e.target);
 
-            VDFValidator.validateForm(e.target)
+            VDFValidator.executeValidation(e.target)
                 .then(() => {
                     // form.removeEventListener('submit', fn);
                     // form.submit();
@@ -31,14 +38,40 @@ class VDFValidator
                     VDFValidator.runEvent('onCompletion', e.target);
                 });
         }
-
-        form.addEventListener('submit', fn);
+        form.addEventListener('submit', formFn);
     }
 
-    static async validateForm(form)
+    static #registerInputEvents(form)
+    {
+        const inputChangeFn = (e) => {
+            const f = e.target;
+            if (!this.#changed.includes(f.name)) {
+                this.#changed.push(f.name);
+            }
+        };
+        const inputBlurFn = (e) => {
+            if (!this.#changed.includes(e.target.name)) {
+                return;
+            }
+
+            VDFValidator.executeValidation([e.target])
+                .then(() => {
+                    const index = this.#changed.findIndex(e.target.name);
+                    this.#changed.splice(index, 1);
+                })
+                .catch(error => {
+                    VDFValidator.showErrors(error.message);
+                });
+        };
+        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('change', inputChangeFn));
+        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('blur', inputBlurFn));
+    }
+
+    static async executeValidation(formOrFields)
     {
         //Get all fields of the form that have .vfield-* class
-        const fields = [...form.querySelectorAll('[class*=vfield-]')];
+        const isArray = Array.isArray(formOrFields);
+        const fields = isArray ? formOrFields : [...formOrFields.querySelectorAll('[class*=vfield-]')];
         const errors = {};
         for (const f of fields) {
             const validators = VDFValidator.getVDFValidators(f);
@@ -68,6 +101,8 @@ class VDFValidator
 
     static validate(field, validator)
     {
+        this.resetError(field);
+
         return new Promise((resolve, reject) => {
             const {validatorName, params} = VDFValidator.parseValidator(validator);
 
@@ -79,21 +114,31 @@ class VDFValidator
         });
     }
 
+    static resetError(field)
+    {
+        field.style.removeProperty('border');
+        const errorMsg = field.parentNode.querySelector('.verror-msg');
+        if (errorMsg) {
+            errorMsg.remove();
+        }
+    }
+
     static showErrors(data)
     {
         const errors = JSON.parse(data);
-        for (const [field, error] of Object.entries(errors)) {
-            const input = document.querySelector(`[name=${field}]`);
+        for (const [fieldName, error] of Object.entries(errors)) {
+            const field = document.querySelector(`[name=${fieldName}]`);
 
-            if (input) {
-                input.style.border = '1px solid red';
+            if (field) {
+                field.style.border = '1px solid red';
                 
-                const msg = input.getAttribute(`data-verror-${error}`) ?? input.getAttribute(`data-verror`);
+                const msg = field.getAttribute(`data-verror-${error[0].split('-')[0]}`) ?? field.getAttribute(`data-verror`);
                 if (msg) {
                     const msgElement = document.createElement('span');
+                    msgElement.className = 'verror-msg';
                     msgElement.style.color = 'red';
                     msgElement.innerHTML = msg;
-                    input.parentNode.insertBefore(msgElement, input.nextSibling);
+                    field.parentNode.insertBefore(msgElement, field.nextSibling);
                 }
             }
         }
