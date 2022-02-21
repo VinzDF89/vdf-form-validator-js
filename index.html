@@ -78,15 +78,18 @@
                             <label for="password" class="form-label">Password</label>
                             <input type="password" id="password" name="password" class="vfield-password-#minLengthPassword form-control">
                             <div class="verror-password invalid-feedback">
-                                Please insert a password with at least 4 characters, a number and a symbol amongst !$#-.
+                                <p>Please insert a password with at least 4 characters, a number and a symbol amongst !$#-.</p>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="repeat-password" class="form-label">Ripeti password</label>
-                            <input type="password" id="repeat-password" name="repeat-password" class="vfield-required vfield-equalto-password form-control">
-                            <div class="verror-repeat-password invalid-feedback">
-                                Please insert the same password as before!
+                            <input type="password" id="repeat-password" name="repeatpassword" class="vfield-required vfield-equalto-password form-control">
+                            <div class="verror-repeatpassword-required invalid-feedback">
+                                This field is required!
+                            </div>
+                            <div class="verror-repeatpassword-equalto invalid-feedback">
+                                Please insert the same password as the previous one!
                             </div>
                         </div>
                     </fieldset>

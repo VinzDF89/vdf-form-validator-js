@@ -14,59 +14,6 @@ class VDFValidator
         this.#registerInputEvents(form);
     }
 
-    static #registerFormEvents(form)
-    {
-        const formFn = (e) => {
-            e.preventDefault();
-
-            VDFValidator.runEvent('onBeforeValidation', e.target);
-
-            VDFValidator.executeValidation(e.target)
-                .then(() => {
-                    // form.removeEventListener('submit', fn);
-                    // form.submit();
-                    // form.addEventListener('submit', fn);
-                    VDFValidator.runEvent('onValidated', e.target);
-                    alert('Form validated!');
-                })
-                .catch(error => {
-                    console.log('Form validation failed!', error);
-                    VDFValidator.showErrors(error.message);
-                    VDFValidator.runEvent('onFailure', e.target, error);
-                })
-                .finally(() => {
-                    VDFValidator.runEvent('onCompletion', e.target);
-                });
-        }
-        form.addEventListener('submit', formFn);
-    }
-
-    static #registerInputEvents(form)
-    {
-        const inputChangeFn = (e) => {
-            const f = e.target;
-            if (!this.#changed.includes(f.name)) {
-                this.#changed.push(f.name);
-            }
-        };
-        const inputBlurFn = (e) => {
-            if (!this.#changed.includes(e.target.name)) {
-                return;
-            }
-
-            VDFValidator.executeValidation([e.target])
-                .then(() => {
-                    const index = this.#changed.findIndex(e.target.name);
-                    this.#changed.splice(index, 1);
-                })
-                .catch(error => {
-                    VDFValidator.showErrors(error.message);
-                });
-        };
-        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('change', inputChangeFn));
-        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('blur', inputBlurFn));
-    }
-
     static async executeValidation(formOrFields)
     {
         //Get all fields of the form that have .vfield-* class
@@ -117,7 +64,7 @@ class VDFValidator
     static resetError(field)
     {
         field.style.removeProperty('border');
-        const errorMsg = field.parentNode.querySelector('.verror-msg');
+        const errorMsg = field.parentNode.querySelector('.verrormsg');
         if (errorMsg) {
             errorMsg.remove();
         }
@@ -135,10 +82,20 @@ class VDFValidator
                 const msg = field.getAttribute(`data-verror-${error[0].split('-')[0]}`) ?? field.getAttribute(`data-verror`);
                 if (msg) {
                     const msgElement = document.createElement('span');
-                    msgElement.className = 'verror-msg';
+                    msgElement.className = 'verrormsg';
                     msgElement.style.color = 'red';
                     msgElement.innerHTML = msg;
                     field.parentNode.insertBefore(msgElement, field.nextSibling);
+                } else {
+                    let errorElement = field.form.querySelector(`.verror-${field.name}`);
+                    if (!errorElement) {
+                        const errorName = error[0].split('-')[0];
+                        errorElement = field.form.querySelector(`.verror-${field.name}-${errorName}`);
+                    }
+
+                    if (errorElement) {
+                        errorElement.style.display = 'inline';
+                    }
                 }
             }
         }
@@ -173,6 +130,61 @@ class VDFValidator
         if (this[name]) {
             this[name](form, errors);
         }
+    }
+
+    static #registerFormEvents(form)
+    {
+        const formFn = (e) => {
+            e.preventDefault();
+
+            VDFValidator.runEvent('onBeforeValidation', e.target);
+
+            VDFValidator.executeValidation(e.target)
+                .then(() => {
+                    // form.removeEventListener('submit', fn);
+                    // form.submit();
+                    // form.addEventListener('submit', fn);
+                    VDFValidator.runEvent('onValidated', e.target);
+                    alert('Form validated!');
+                })
+                .catch(error => {
+                    console.log('Form validation failed!', error);
+                    VDFValidator.showErrors(error.message);
+                    VDFValidator.runEvent('onFailure', e.target, error);
+                })
+                .finally(() => {
+                    VDFValidator.runEvent('onCompletion', e.target);
+                });
+        }
+        form.addEventListener('submit', formFn);
+    }
+
+    static #registerInputEvents(form)
+    {
+        const inputChangeFn = (e) => {
+            const f = e.target;
+            if (!this.#changed.includes(f.name)) {
+                this.#changed.push(f.name);
+            }
+        };
+        const inputBlurFn = (e) => {
+            if (!this.#changed.includes(e.target.name)) {
+                return;
+            }
+
+            VDFValidator.executeValidation([e.target])
+                .then(() => {
+                    const index = this.#changed.findIndex(item => item === e.target.name);
+                    if (index >= 0) {
+                        this.#changed.splice(index, 1);
+                    }
+                })
+                .catch(error => {
+                    VDFValidator.showErrors(error.message);
+                });
+        };
+        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('change', inputChangeFn));
+        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('blur', inputBlurFn));
     }
 }
 
