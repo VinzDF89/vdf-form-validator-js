@@ -1,9 +1,9 @@
 class VDFValidator
 {
-    static onBeforeValidation;
-    static onValidated;
-    static onFailure;
-    static onCompletion;
+    static #onBeforeValidation = [];
+    static #onValidated = [];
+    static #onFailure = [];
+    static #onCompletion = [];
 
     static #variables = {};
     static #changed = [];
@@ -125,11 +125,43 @@ class VDFValidator
         this.#variables[name] = value;
     }
 
-    static runEvent(name, form, errors)
+    static onBeforeValidation(fn)
     {
-        if (this[name]) {
-            this[name](form, errors);
+        this.#onBeforeValidation.push(fn);
+    }
+
+    static onValidated(fn)
+    {
+        this.#onValidated.push(fn);
+    }
+
+    static onFailure(fn)
+    {
+        this.#onFailure.push(fn);
+    }
+
+    static onCompletion(fn)
+    {
+        this.#onCompletion.push(fn);
+    }
+
+    static #runEvent(name, form, errors)
+    {
+        const events = {
+            onBeforeValidation: this.#onBeforeValidation,
+            onValidated: this.#onValidated,
+            onFailure: this.#onFailure,
+            onCompletion: this.#onCompletion
+        };
+        
+        if (events[name]) {
+            events[name].map(item => item(form, errors));
         }
+    }
+
+    static resetEvent(name)
+    {
+        //TODO
     }
 
     static #registerFormEvents(form)
@@ -137,23 +169,23 @@ class VDFValidator
         const formFn = (e) => {
             e.preventDefault();
 
-            VDFValidator.runEvent('onBeforeValidation', e.target);
+            VDFValidator.#runEvent('onBeforeValidation', e.target);
 
             VDFValidator.executeValidation(e.target)
                 .then(() => {
                     // form.removeEventListener('submit', fn);
                     // form.submit();
                     // form.addEventListener('submit', fn);
-                    VDFValidator.runEvent('onValidated', e.target);
+                    VDFValidator.#runEvent('onValidated', e.target);
                     alert('Form validated!');
                 })
                 .catch(error => {
                     console.log('Form validation failed!', error);
                     VDFValidator.showErrors(error.message);
-                    VDFValidator.runEvent('onFailure', e.target, error);
+                    VDFValidator.#runEvent('onFailure', e.target, error);
                 })
                 .finally(() => {
-                    VDFValidator.runEvent('onCompletion', e.target);
+                    VDFValidator.#runEvent('onCompletion', e.target);
                 });
         }
         form.addEventListener('submit', formFn);
