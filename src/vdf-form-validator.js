@@ -64,9 +64,14 @@ class VDFValidator
     static resetError(field)
     {
         field.style.removeProperty('border');
-        const errorMsg = field.parentNode.querySelector('.verrormsg');
+        let errorMsg = field.parentNode.querySelector('.verrormsg');
         if (errorMsg) {
             errorMsg.remove();
+        }
+
+        errorMsg = [...field.form.querySelectorAll(`[class*=verror-${field.name}]`)];
+        if (errorMsg.length) {
+            errorMsg.map(item => item.style.display = 'none');
         }
     }
 
@@ -130,9 +135,19 @@ class VDFValidator
         this.#onBeforeValidation.push(fn);
     }
 
+    static resetOnBeforeValidation()
+    {
+        this.#onBeforeValidation = [];
+    }
+
     static onValidated(fn)
     {
         this.#onValidated.push(fn);
+    }
+
+    static resetOnValidated()
+    {
+        this.#onValidated = [];
     }
 
     static onFailure(fn)
@@ -140,9 +155,19 @@ class VDFValidator
         this.#onFailure.push(fn);
     }
 
+    static resetOnFailure()
+    {
+        this.#onFailure = [];
+    }
+
     static onCompletion(fn)
     {
         this.#onCompletion.push(fn);
+    }
+
+    static resetOnCompletion()
+    {
+        this.#onCompletion = [];
     }
 
     static #runEvent(name, form, errors)
@@ -159,9 +184,14 @@ class VDFValidator
         }
     }
 
-    static resetEvent(name)
+    static #disableSubmitButtons(form)
     {
-        //TODO
+        [...form.querySelectorAll('input[type=submit], button')].map(item => item.setAttribute('disabled', true));
+    }
+
+    static #enableSubmitButtons(form)
+    {
+        [...form.querySelectorAll('input[type=submit], button')].map(item => item.removeAttribute('disabled'));
     }
 
     static #registerFormEvents(form)
@@ -169,6 +199,7 @@ class VDFValidator
         const formFn = (e) => {
             e.preventDefault();
 
+            VDFValidator.#disableSubmitButtons(form);
             VDFValidator.#runEvent('onBeforeValidation', e.target);
 
             VDFValidator.executeValidation(e.target)
@@ -176,15 +207,17 @@ class VDFValidator
                     // form.removeEventListener('submit', fn);
                     // form.submit();
                     // form.addEventListener('submit', fn);
+                    console.log('VDFValidator: form validation succeeded!');
                     VDFValidator.#runEvent('onValidated', e.target);
                     alert('Form validated!');
                 })
                 .catch(error => {
-                    console.log('Form validation failed!', error);
+                    console.log('VDFValidator: form validation failed!', error);
                     VDFValidator.showErrors(error.message);
                     VDFValidator.#runEvent('onFailure', e.target, error);
                 })
                 .finally(() => {
+                    VDFValidator.#enableSubmitButtons(form);
                     VDFValidator.#runEvent('onCompletion', e.target);
                 });
         }
