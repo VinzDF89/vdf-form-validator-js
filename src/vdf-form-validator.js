@@ -26,6 +26,7 @@ class VDFValidator
                 try {
                     await VDFValidator.validate(f, v);
                 } catch (e) {
+                    console.log(e);
                     if (!errors.hasOwnProperty(f.name)) {
                         errors[f.name] = [];
                     }
@@ -69,7 +70,9 @@ class VDFValidator
             errorMsg.remove();
         }
 
-        errorMsg = [...field.form.querySelectorAll(`[class*=verror-${field.name}]`)];
+        const fieldName = field.name.replace(/[^a-zA-Z]/, '');
+
+        errorMsg = [...field.form.querySelectorAll(`[class*=verror-${fieldName}]`)];
         if (errorMsg.length) {
             errorMsg.map(item => item.style.display = 'none');
         }
@@ -92,10 +95,11 @@ class VDFValidator
                     msgElement.innerHTML = msg;
                     field.parentNode.insertBefore(msgElement, field.nextSibling);
                 } else {
-                    let errorElement = field.form.querySelector(`.verror-${field.name}`);
+                    const fieldName = field.name.replace(/[^a-zA-Z]/, '');
+                    let errorElement = field.form.querySelector(`.verror-${fieldName}`);
                     if (!errorElement) {
                         const errorName = error[0].split('-')[0];
-                        errorElement = field.form.querySelector(`.verror-${field.name}-${errorName}`);
+                        errorElement = field.form.querySelector(`.verror-${fieldName}-${errorName}`);
                     }
 
                     if (errorElement) {
@@ -204,15 +208,14 @@ class VDFValidator
 
             VDFValidator.executeValidation(e.target)
                 .then(() => {
-                    // form.removeEventListener('submit', fn);
-                    // form.submit();
-                    // form.addEventListener('submit', fn);
                     console.log('VDFValidator: form validation succeeded!');
                     VDFValidator.#runEvent('onValidated', e.target);
-                    alert('Form validated!');
+                    form.removeEventListener('submit', formFn);
+                    form.submit();
+                    form.addEventListener('submit', formFn);
                 })
                 .catch(error => {
-                    console.log('VDFValidator: form validation failed!', error);
+                    console.log('VDFValidator: form validation failed!');
                     VDFValidator.showErrors(error.message);
                     VDFValidator.#runEvent('onFailure', e.target, error);
                 })
@@ -292,13 +295,18 @@ class VDFValidatorFunctions
     static equalto(field, params, resolve, reject)
     {
         const value = field.value.trim();
-        const target = field.form.querySelector(`[name=${params[0]}]`).value.trim();
+        const target = field.form.querySelector(`[name=${params[0]}]`);
+        if (target) {
+            const targetValue = target.value.trim();
 
-        if (!value.length || !target) {
-            resolve();
+            if (!value.length || !targetValue) {
+                resolve();
+            }
+
+            value === targetValue ? resolve() : reject(`Field value (${field.name}) not equal to the target's value (${target.name})`);
         }
-
-        value === target ? resolve() : reject(`Value (${value}) not equal to the target's value (${target})`);
+        
+        reject(`Target field (${target.name}) is not defined`);
     }
 }
 
