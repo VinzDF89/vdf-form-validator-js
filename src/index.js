@@ -1,4 +1,4 @@
-class VDFValidator
+export default class VDFValidator
 {
     static #onBeforeValidation = [];
     static #onValidated = [];
@@ -10,8 +10,8 @@ class VDFValidator
 
     static registerForm(form)
     {
-        this.#registerFormEvents(form);
-        this.#registerInputEvents(form);
+        VDFValidator.#registerFormEvents(form);
+        VDFValidator.#registerInputEvents(form);
     }
 
     static async executeValidation(formOrFields)
@@ -115,7 +115,7 @@ class VDFValidator
         const tokens = validator.split('-');
         const validatorName = tokens.shift();
         const params = tokens.map(item => 
-            /^#/.test(item) ? this.#variables[item.substring(1)] : item
+            /^#/.test(item) ? VDFValidator.#variables[item.substring(1)] : item
         );
 
         return {
@@ -131,56 +131,56 @@ class VDFValidator
 
     static defineVariable(name, value)
     {
-        this.#variables[name] = value;
+        VDFValidator.#variables[name] = value;
     }
 
     static onBeforeValidation(fn)
     {
-        this.#onBeforeValidation.push(fn);
+        VDFValidator.#onBeforeValidation.push(fn);
     }
 
     static resetOnBeforeValidation()
     {
-        this.#onBeforeValidation = [];
+        VDFValidator.#onBeforeValidation = [];
     }
 
     static onValidated(fn)
     {
-        this.#onValidated.push(fn);
+        VDFValidator.#onValidated.push(fn);
     }
 
     static resetOnValidated()
     {
-        this.#onValidated = [];
+        VDFValidator.#onValidated = [];
     }
 
     static onFailure(fn)
     {
-        this.#onFailure.push(fn);
+        VDFValidator.#onFailure.push(fn);
     }
 
     static resetOnFailure()
     {
-        this.#onFailure = [];
+        VDFValidator.#onFailure = [];
     }
 
     static onCompletion(fn)
     {
-        this.#onCompletion.push(fn);
+        VDFValidator.#onCompletion.push(fn);
     }
 
     static resetOnCompletion()
     {
-        this.#onCompletion = [];
+        VDFValidator.#onCompletion = [];
     }
 
     static #runEvent(name, form, errors)
     {
         const events = {
-            onBeforeValidation: this.#onBeforeValidation,
-            onValidated: this.#onValidated,
-            onFailure: this.#onFailure,
-            onCompletion: this.#onCompletion
+            onBeforeValidation: VDFValidator.#onBeforeValidation,
+            onValidated: VDFValidator.#onValidated,
+            onFailure: VDFValidator.#onFailure,
+            onCompletion: VDFValidator.#onCompletion
         };
         
         if (events[name]) {
@@ -231,20 +231,20 @@ class VDFValidator
     {
         const inputChangeFn = (e) => {
             const f = e.target;
-            if (!this.#changed.includes(f.name)) {
-                this.#changed.push(f.name);
+            if (!VDFValidator.#changed.includes(f.name)) {
+                VDFValidator.#changed.push(f.name);
             }
         };
         const inputBlurFn = (e) => {
-            if (!this.#changed.includes(e.target.name)) {
+            if (!VDFValidator.#changed.includes(e.target.name)) {
                 return;
             }
 
             VDFValidator.executeValidation([e.target])
                 .then(() => {
-                    const index = this.#changed.findIndex(item => item === e.target.name);
+                    const index = VDFValidator.#changed.findIndex(item => item === e.target.name);
                     if (index >= 0) {
-                        this.#changed.splice(index, 1);
+                        VDFValidator.#changed.splice(index, 1);
                     }
                 })
                 .catch(error => {
