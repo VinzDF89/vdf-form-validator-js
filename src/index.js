@@ -210,9 +210,6 @@ export default class VDFValidator
                 .then(() => {
                     console.log('VDFValidator: form validation succeeded!');
                     VDFValidator.#runEvent('onValidated', e.target);
-                    form.removeEventListener('submit', formFn);
-                    form.submit();
-                    form.addEventListener('submit', formFn);
                 })
                 .catch(error => {
                     console.log('VDFValidator: form validation failed!');
