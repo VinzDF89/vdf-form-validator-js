@@ -55,7 +55,15 @@ export default class VDFValidator
             const {validatorName, params} = VDFValidator.parseValidator(validator);
 
             if (typeof VDFValidatorFunctions[validatorName] === 'function') {
-                VDFValidatorFunctions[validatorName](field, params, resolve, reject);
+                const func = VDFValidatorFunctions[validatorName];
+                // If the function doesn't declare the 4 parameters: field, params, resolve and reject
+                // then it is not an asynchronous validation logic
+                if (func.length < 4) {
+                    func(field, params) ? resolve() : reject(`${field.name} not valid`);
+                // otherwise, it is, and it will be auto-resolved
+                } else {
+                    func(field, params, resolve, reject);
+                }
             } else {
                 reject(`Undefined validator "${validatorName}"`);
             }
@@ -92,8 +100,10 @@ export default class VDFValidator
                     const msgElement = document.createElement('span');
                     msgElement.className = 'verrormsg';
                     msgElement.style.color = 'red';
+                    msgElement.style.display = 'block';
                     msgElement.innerHTML = msg;
-                    field.parentNode.insertBefore(msgElement, field.nextSibling);
+
+                    field.parentNode.appendChild(msgElement);
                 } else {
                     const fieldName = field.name.replace(/[^a-zA-Z]/, '');
                     let errorElement = field.form.querySelector(`.verror-${fieldName}`);
@@ -258,8 +268,9 @@ class VDFValidatorFunctions
     static required(field, params, resolve, reject)
     {
         const value = field.value.trim();
+        const isBox = field.type == 'checkbox' || field.type == 'radio';
 
-        !!value ? resolve() : reject(`Required value for "${field.name}" is missing`);
+        ((isBox && field.checked) || (!isBox && !!value)) ? resolve() : reject(`Required value for "${field.name}" is missing`);
     }
 
     static email(field, params, resolve, reject)
