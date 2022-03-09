@@ -52,6 +52,7 @@ If you want to specify a different error message for each validation, you can do
 For example:
 - data-verror-required="This field is required!"
 - data-verror-min="The value provided is not long enough!"
+
 With the compact error messages, a span element is added just after the field input, with the class "verrormsg" and an inline style property to set the color of the text to red.
 
 ### Custom error messages
