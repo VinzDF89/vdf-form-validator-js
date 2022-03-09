@@ -26,7 +26,7 @@ export default class VDFValidator
                 try {
                     await VDFValidator.validate(f, v);
                 } catch (e) {
-                    console.log(e);
+                    console.log(e ?? `"${f.name}" not valid`);
                     if (!errors.hasOwnProperty(f.name)) {
                         errors[f.name] = [];
                     }
