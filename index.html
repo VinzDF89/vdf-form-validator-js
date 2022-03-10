@@ -22,8 +22,6 @@
             VDFValidator.onCompletion(function(form) {
                 console.log('On completion');
             });
-            
-            VDFValidator.defineVariable('minLengthPassword', 8);
 
             VDFValidator.defineFunction('password', function(field, params) {
                 const value = field.value.trim();
@@ -73,7 +71,7 @@
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="vfield-password-#minLengthPassword form-control">
+                            <input type="password" id="password" name="password" class="vfield-password-8 form-control">
                             <div class="verror-password invalid-feedback">
                                 <p>Please insert a password with at least 4 characters, a number and a symbol amongst !$#-.</p>
                             </div>
