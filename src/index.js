@@ -1,3 +1,7 @@
+import smoothscroll from 'smoothscroll-polyfill';
+
+smoothscroll.polyfill();
+
 export default class VDFValidator
 {
     static #onBeforeValidation = [];
@@ -184,6 +188,15 @@ export default class VDFValidator
         VDFValidator.#onCompletion = [];
     }
 
+    static scrollToFirstErrorField(errors)
+    {
+        errors = Object.keys(JSON.parse(errors));
+        if (errors.length) {
+            const field = document.querySelector(`[name=${errors[0]}]`);
+            window.scrollTo({top: field.parentNode.offsetTop, behavior: 'smooth'});
+        }
+    }
+
     static #runEvent(name, form, errors)
     {
         const events = {
@@ -224,6 +237,7 @@ export default class VDFValidator
                 .catch(error => {
                     console.log('VDFValidator: form validation failed!');
                     VDFValidator.showErrors(error.message);
+                    VDFValidator.scrollToFirstErrorField(error.message);
                     VDFValidator.#runEvent('onFailure', e.target, error);
                 })
                 .finally(() => {
