@@ -73,3 +73,43 @@ This second one instead, shows how to provide an error message for a specific va
     </div>
 
 **Note**: every element containing the custom error message, should be hidden by manually setting the CSS property display to none. In the 2 examples above, this is done by the class "invalid-feedback" from the Bootstrap CSS framework.
+Making a select tag as required, be sure that at least one option element has an explicit value attribute set to empty string.
+
+## Examples for custom validations
+
+### Synchronous custom validation example: password validation
+
+    VDFValidator.defineFunction('password', function(field, params) {
+        const value = field.value.trim();
+        const minLength = params[0] ?? 6;
+        const regex = new RegExp(`(?=.*[a-zA-Z]+)(?=.*[0-9]+)(?=.*[!$#-])[a-zA-Z0-9!$#-]{${minLength},}`);
+
+        if (!value.length || !regex.test(value)) {
+            return false;
+        }
+
+        return true;
+    });
+
+As synchronous custom validation, the function must return a boolean value: true for success or false for failure.
+
+### Asynchronous custom validation example: username's existence checking
+
+    VDFValidator.defineFunction('check-username', function(field, params, resolve, reject) {
+        const userName = params[0] ?? '';
+        if (!userName.length) {
+            reject();
+        }
+
+        axios.get('restapi.example.com/user/check-name', {
+            userName: userName
+        })
+        .then(function (response) {
+            resolve();
+        })
+        .catch(function (error) {
+            reject();
+        });
+    });
+
+As asynchronous custom validation, the function declares tow additional paramters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure
