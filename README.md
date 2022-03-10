@@ -53,7 +53,7 @@ For example:
 - data-verror-required="This field is required!"
 - data-verror-min="The value provided is not long enough!"
 
-With the compact error messages, a span element is added just after the field input, with the class "verrormsg" and an inline style property to set the color of the text to red.
+With the compact error messages, a span element is added just before the field input's parent node, with the class "verrormsg" and an inline style property to set the color of the text to red.
 
 ### Custom error messages
 If you need a custom structure for the error messages, you can define a div (or a different kind of element) for each field, or for each validation, and put inside it everything you need.
