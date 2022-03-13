@@ -112,4 +112,4 @@ As synchronous custom validation, the function must return a boolean value: true
         });
     });
 
-As asynchronous custom validation, the function declares tow additional paramters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure
+As asynchronous custom validation, the function declares two additional paramters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure
