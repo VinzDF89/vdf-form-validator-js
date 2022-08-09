@@ -21,18 +21,18 @@ The following are the pre-defined classes available:
 - **vfield-equalto-$1**: the field is valid only when its value is equal to the value of the field specified by the parameter ($1) which represents the name of the input field.
 
 ## Defining variables
-If you need to pass a more complex value as parameter to a class, you can define a variable and name it before you pass its name (preceded by #) as the parameter of the class. This is possible by using the function **VDFValidator.defineVariable()**.  
+If you need to pass a more complex value as parameter to a class, you can define a variable and name it before you pass its name (preceded by #) as the parameter of the class. This is possible by using the **VDFValidator.defineVariable()** function.
 For example, you can define a variable in this way:
 
-    VDFValidator.defineVariable('minLengthPassword', 8)
+    VDFValidator.defineVariable('complexValue', 'This is a complex value example to pass as parameter')
 
 
 and then add the class to the input:
 
-    <input type="password" id="password" name="password" class="vfield-password-#minLengthPassword">
+    <input type="text" name="customValidationWithComplexParameter" class="vfield-customValidation-#complexValue">
 
 ## Custom validation logic functions
-You can define your own custom validation logic by using **VDFValidator.defineFunction()**. This function accepts 2 paramters:
+You can define your own custom validation logic by using **VDFValidator.defineFunction()**. This function accepts 2 parameters:
 1. The name to use as class. For example, if you define a function with the name "password", then you can specify the class name "vfield-password" to the field you want it to be applied.
 2. A function that contains the validation logic. If you want to do an asynchronous validation, the function must declare 4 parameters: **field**, **params**, **resolve** and **reject** in order to work.
 - **field**: the HTML input field's DOM object;
@@ -112,4 +112,4 @@ As synchronous custom validation, the function must return a boolean value: true
         });
     });
 
-As asynchronous custom validation, the function declares two additional paramters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure
+As asynchronous custom validation, the function declares two additional parameters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure
