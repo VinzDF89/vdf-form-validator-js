@@ -30,11 +30,12 @@ export default class VDFValidator
                 try {
                     await VDFValidator.validate(f, v);
                 } catch (e) {
-                    console.log(e ?? `"${f.name}" not valid`);
+                    console.log(`"${f.name}" not valid`);
                     if (!errors.hasOwnProperty(f.name)) {
                         errors[f.name] = [];
                     }
-                    errors[f.name].push(v);
+                    const { validatorName } = VDFValidator.parseValidator(v);
+                    errors[f.name].push({[validatorName]: e});
                 }
             }
         }
@@ -63,7 +64,12 @@ export default class VDFValidator
                 // If the function doesn't declare the 4 parameters: field, params, resolve and reject
                 // then it is not an asynchronous validation logic
                 if (func.length < 4) {
-                    func(field, params) ? resolve() : reject(`${field.name} not valid`);
+                    const result = func(field, params);
+                    if (result === true) {
+                        resolve(true);
+                    } else {
+                        reject(result);
+                    }
                 // otherwise, it is, and it will be auto-resolved
                 } else {
                     func(field, params, resolve, reject);
@@ -90,17 +96,26 @@ export default class VDFValidator
         }
     }
 
-    static showErrors(data)
+    static showErrors(data, formSubmitted)
     {
         const errors = JSON.parse(data);
+        let focused = false;
         for (const [fieldName, error] of Object.entries(errors)) {
             const field = document.querySelector(`[name=${fieldName}]`);
 
             if (field) {
-                field.style.border = '1px solid red';
+                field.style.borderColor = 'red';
+                const validationName = Object.keys(error[0])[0];
+                const customErrorMessage = error[0][validationName];
                 
-                const msg = field.getAttribute(`data-verror-${error[0].split('-')[0]}`) ?? field.getAttribute(`data-verror`);
-                if (msg) {
+                const fieldName = field.name.replace(/[^a-zA-Z]/, '');
+                let errorElement = field.form.querySelector(`.verror-${fieldName}`);
+                if (!errorElement) {
+                    errorElement = field.form.querySelector(`.verror-${fieldName}-${validationName}`);
+                }
+             
+                const msg = field.getAttribute(`data-verror-${validationName}`) ?? field.getAttribute(`data-verror`) ?? customErrorMessage;
+                if (msg && !errorElement) {
                     const msgElement = document.createElement('span');
                     msgElement.className = 'verrormsg';
                     msgElement.style.color = 'red';
@@ -108,17 +123,13 @@ export default class VDFValidator
                     msgElement.innerHTML = msg;
 
                     field.parentNode.appendChild(msgElement);
-                } else {
-                    const fieldName = field.name.replace(/[^a-zA-Z]/, '');
-                    let errorElement = field.form.querySelector(`.verror-${fieldName}`);
-                    if (!errorElement) {
-                        const errorName = error[0].split('-')[0];
-                        errorElement = field.form.querySelector(`.verror-${fieldName}-${errorName}`);
-                    }
+                } else if (errorElement) {
+                    errorElement.style.display = 'inline';
+                }
 
-                    if (errorElement) {
-                        errorElement.style.display = 'inline';
-                    }
+                if (!focused && formSubmitted) {
+                    field.focus();
+                    focused = true;
                 }
             }
         }
@@ -236,7 +247,7 @@ export default class VDFValidator
                 })
                 .catch(error => {
                     console.log('VDFValidator: form validation failed!');
-                    VDFValidator.showErrors(error.message);
+                    VDFValidator.showErrors(error.message, true);
                     VDFValidator.scrollToFirstErrorField(error.message);
                     VDFValidator.#runEvent('onFailure', e.target, error);
                 })
@@ -269,11 +280,11 @@ export default class VDFValidator
                     }
                 })
                 .catch(error => {
-                    VDFValidator.showErrors(error.message);
+                    VDFValidator.showErrors(error.message, false);
                 });
         };
-        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('change', inputChangeFn));
-        [...document.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('blur', inputBlurFn));
+        [...form.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('change', inputChangeFn));
+        [...form.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('blur', inputBlurFn));
     }
 }
 
@@ -284,7 +295,7 @@ class VDFValidatorFunctions
         const value = field.value.trim();
         const isBox = field.type == 'checkbox' || field.type == 'radio';
 
-        ((isBox && field.checked) || (!isBox && !!value)) ? resolve() : reject(`Required value for "${field.name}" is missing`);
+        ((isBox && field.checked) || (!isBox && !!value)) ? resolve() : reject('Required field');
     }
 
     static email(field, params, resolve, reject)
@@ -303,7 +314,7 @@ class VDFValidatorFunctions
         const length = field.value.trim().length;
         const minLength = parseInt(params[0]);
 
-        (!length || length >= minLength) ? resolve() : reject(`Required minimum characters of ${minLength}`);
+        (!length || length >= minLength) ? resolve() : reject(`Minimum of ${minLength} characters`);
     }
 
     static max(field, params, resolve, reject)
@@ -311,7 +322,7 @@ class VDFValidatorFunctions
         const length = field.value.trim().length;
         const maxLength = parseInt(params[0]);
 
-        length <= maxLength ? resolve() : reject(`Required maximum characters of ${maxLength}`);
+        length <= maxLength ? resolve() : reject(`Maximum of ${maxLength} characters`);
     }
 
     static equalto(field, params, resolve, reject)
@@ -321,14 +332,18 @@ class VDFValidatorFunctions
         if (target) {
             const targetValue = target.value.trim();
 
-            if (!value.length || !targetValue) {
+            if (value === targetValue) {
                 resolve();
+                return;
+            } else {
+                console.log(`Field value (${field.name}) not equal to the target's value (${target.name})`);
+                reject('Value not valid');
+                return;
             }
-
-            value === targetValue ? resolve() : reject(`Field value (${field.name}) not equal to the target's value (${target.name})`);
         }
         
-        reject(`Target field (${target.name}) is not defined`);
+        console.log(`Target field (${target.name}) is not defined`);
+        reject('Value not valid');
     }
 }
 
