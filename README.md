@@ -39,7 +39,9 @@ You can define your own custom validation logic by using **VDFValidator.defineFu
 - **field**: the HTML input field's DOM object;
 - **params**: an array containing all passed parameters (yes, you can pass multiple parameters by using **-** as separator);
 - **resolve**: the function to call if the validation passes
-- **reject**: the function to call if the validation doesn't pass (if a string is passed as argument, then it will be used as custom error message)
+- **reject**: the function to call if the validation doesn't pass (if a string is passed as argument, then it will be used as custom error message). 
+
+Important: when calling resolve or reject, always add a "return" statement to ensure that the execution of the code will stop!
 
 otherwise, the function must just declare the first 2 parameters, and since in this case it is not an asynchronous validation, the function must return a boolean value, **true** if the validation passes, or **false** if it fails (instead of the **false** boolean value, you could also return a string that will be used as custom error message).
 
