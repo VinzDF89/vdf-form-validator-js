@@ -76,7 +76,7 @@ This second one instead, shows how to provide an error message for a specific va
 **Note**: every element containing the custom error message, should be hidden by manually setting the CSS property display to none. In the 2 examples above, this is done by the class "invalid-feedback" from the Bootstrap CSS framework.
 Making a select tag as required, be sure that at least one option element has an explicit value attribute set to empty string.
 
-### In-function error message
+### In-function error messages
 If custom validation functions are defined, they could return a custom error message by simply returning a string instead of the "false" boolean value (in case of synchronous validations) or by calling reject() and passing it a string as argument (in case of asynchronous validations).
 
 ### Multiple error modes
