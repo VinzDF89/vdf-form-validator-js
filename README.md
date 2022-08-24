@@ -7,7 +7,8 @@ All you need to start utilizing the VDF Form Validator JS plugin, is to import t
 ## Usage
 ### The logic behind the plugin
 This plugin can work by adding specific classes to every form you want to manage with, and by adding specific classes to the input fields, to specify how these should be validated before submitting the form.
-Every validation logic is handled by using JavaScript Promises under the hood, then you could also validate a field by making an asynchronous request.
+Every validation logic is handled by using JavaScript Promises under the hood, therefore you could also validate a field by making an asynchronous request.
+The plugin also guarantees an high compatibility with old browsers thanks to the build made with Babel.
 
 ### Using classes
 Every form you want to validate, must use the class **vform**.
@@ -27,7 +28,7 @@ For example, you can define a variable in this way:
     VDFValidator.defineVariable('complexValue', 'This is a complex value example to pass as parameter')
 
 
-and then add the class to the input:
+and then add the following class to the input:
 
     <input type="text" name="customValidationWithComplexParameter" class="vfield-customValidation-#complexValue">
 
@@ -38,12 +39,12 @@ You can define your own custom validation logic by using **VDFValidator.defineFu
 - **field**: the HTML input field's DOM object;
 - **params**: an array containing all passed parameters (yes, you can pass multiple parameters by using **-** as separator);
 - **resolve**: the function to call if the validation passes
-- **reject**: the function to call if the validation doesn't pass
+- **reject**: the function to call if the validation doesn't pass (if a string is passed as argument, then it will be used as custom error message)
 
-otherwise, the function must just declare the first 2 parameters, and since in this case it is not an asynchronous validation, the function must return a boolean value, **true** if the validation passes, or **false** if it fails.
+otherwise, the function must just declare the first 2 parameters, and since in this case it is not an asynchronous validation, the function must return a boolean value, **true** if the validation passes, or **false** if it fails (instead of the **false** boolean value, you could also return a string that will be used as custom error message).
 
 ## Error messages' handling
-Basically there are 2 different types of error messages' handlings: the compact mode and che custom mode.
+Basically there are 3 different types of error messages' handlings: the compact mode, the custom mode and the in-function mode.
 
 ### Compact error messages
 This is the simplest way to define error messages for each field and possibly for each registered validation.
@@ -75,6 +76,15 @@ This second one instead, shows how to provide an error message for a specific va
 **Note**: every element containing the custom error message, should be hidden by manually setting the CSS property display to none. In the 2 examples above, this is done by the class "invalid-feedback" from the Bootstrap CSS framework.
 Making a select tag as required, be sure that at least one option element has an explicit value attribute set to empty string.
 
+### In-function error message
+If custom validation functions are defined, they could return a custom error message by simply returning a string instead of the "false" boolean value (in case of synchronous validations) or by calling reject() and passing it a string as argument (in case of asynchronous validations).
+
+### Multiple error modes
+
+If more than one mode is provided for a single field, then this is the priority that will be followed:
+
+Custom error messages > Compact error messages > In-function error messages
+
 ## Examples for custom validations
 
 ### Synchronous custom validation example: password validation
@@ -85,7 +95,7 @@ Making a select tag as required, be sure that at least one option element has an
         const regex = new RegExp(`(?=.*[a-zA-Z]+)(?=.*[0-9]+)(?=.*[!$#-])[a-zA-Z0-9!$#-]{${minLength},}`);
 
         if (!value.length || !regex.test(value)) {
-            return false;
+            return false; // or you could alternatively return a string to be used as error message
         }
 
         return true;
@@ -108,8 +118,8 @@ As synchronous custom validation, the function must return a boolean value: true
             resolve();
         })
         .catch(function (error) {
-            reject();
+            reject(); // you could send a string as argument that will be used as error message
         });
     });
 
-As asynchronous custom validation, the function declares two additional parameters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure
+As asynchronous custom validation, the function declares two additional parameters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure.
