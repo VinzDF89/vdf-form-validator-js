@@ -36,6 +36,7 @@ export default class VDFValidator
                     }
                     const { validatorName } = VDFValidator.parseValidator(v);
                     errors[f.name].push({[validatorName]: e});
+                    break;
                 }
             }
         }
@@ -82,6 +83,7 @@ export default class VDFValidator
 
     static resetError(field)
     {
+        field.classList.remove('verror');
         field.style.removeProperty('border');
         let errorMsg = field.parentNode.querySelector('.verrormsg');
         if (errorMsg) {
@@ -104,6 +106,7 @@ export default class VDFValidator
             const field = document.querySelector(`[name=${fieldName}]`);
 
             if (field) {
+                field.classList.add('verror');
                 field.style.borderColor = 'red';
                 const validationName = Object.keys(error[0])[0];
                 const customErrorMessage = error[0][validationName];
