@@ -2,7 +2,47 @@
 A JavaScript plugin to easily and quickly validate HTML forms
 
 ## Installation
-All you need to start utilizing the VDF Form Validator JS plugin, is to import the file **dist/vdf-form-validator.js** in your HTML head section.
+
+### 1. Browser import
+All you need to start utilizing the VDF Form Validator JS plugin, is to import the file **dist/vdf-form-validator.js** in your HTML head section.  
+It is possible to define one or more callback functions that will be triggered once the form is submitted and the validation is successful:
+
+    VDFValidator.onValidated(function(form) {
+        alert('This form has been successfully validated!');
+    });
+
+
+Additional callback functions can be defined by simply call again the "onValidated" method.  
+That's it! This is all you need to do in order to utilize the VDFValidator plugin if you want to import the compiled JS file in the head section of your document.
+
+### 2. JS dependency import
+
+If you want to utilize the plugin as a JS dependency, useful for example when it has to be imported in projects based on reactive frameworks like Vue, then these are the steps to follow:
+
+    import VDFValidator from './src/vdf-form-validator.js';
+
+
+then manually call the following method to initialize the plugin:
+
+    VDFValidator.init();
+
+
+If you are using a framework like Nuxt, and you have also the SSR to handle, then you can avoid the initialization of the plugin on the server by providing a parameter that will stop the execution of the method if its value is falsy. For example:
+
+    VDFValidator.init(process.client);
+
+
+**Note**: it would be better to call this method when the entire page has been loaded.
+
+Now, in the callback that you call once the form has been submitted, you can execute the validation of the form by simply calling the "run" method and passing it the form DOM object as parameter, for example:
+
+    const result = await VDFValidator.run(e.target);
+
+
+"result" will contain an object with the details of the validation result, with the following properties:
+
+- **data**: an object containing the list of fields that failed the validation and the name of the respective validator. This will be an empty object in case the validation is successful
+- **isValid**: booleans true or false, depending on whether the validation has been successful or not
 
 ## Usage
 ### The logic behind the plugin
@@ -125,3 +165,28 @@ As synchronous custom validation, the function must return a boolean value: true
     });
 
 As asynchronous custom validation, the function declares two additional parameters, resolve and reject, to be called (as functions) to respectively end the validation with success or with failure.
+
+## Event callback functions
+
+You can register one or more callback functions for one or more events:
+
+- **onBeforeValidation**
+- **onValidated**
+- **onFailure**
+- **onCompletion**
+
+For all of them, you can pass a parameter that will represent the form involved in the validation process.
+Additional callback functions for the same event, can be defined by simply call the function again.
+For example, this is how to register a callback function in case the validation is not successful:
+
+    VDFValidator.onFailure(function(form) {
+        alert('Something went wrong!');
+    });
+
+
+For each of the events, you can remove all the defined callback functions for a specific event, by calling the following methods:
+
+- **resetOnBeforeValidation**
+- **resetOnValidated**
+- **resetOnFailure**
+- **resetOnCompletion**
