@@ -10,9 +10,11 @@ export default class VDFValidator
     static #variables = {};
     static #changed = [];
 
-    static async run(form)
+    static async run(form, autoHandleButtons = true)
     {
-        VDFValidator.#disableSubmitButtons(form);
+        if (autoHandleButtons) {
+            VDFValidator.#disableSubmitButtons(form);
+        }
         VDFValidator.#runEvent('onBeforeValidation', form);
 
         const result = {
@@ -34,7 +36,9 @@ export default class VDFValidator
 
             result.data = JSON.parse(error.message);
         } finally {
-            VDFValidator.#enableSubmitButtons(form);
+            if (autoHandleButtons) {
+                VDFValidator.#enableSubmitButtons(form);
+            }
             VDFValidator.#runEvent('onCompletion', form);
         }
 

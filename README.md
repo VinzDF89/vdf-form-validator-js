@@ -34,12 +34,33 @@ If you are using a framework like Nuxt, and you have also the SSR to handle, the
 
 **Note**: it would be better to call this method when the entire page has been loaded.
 
-Now, in the callback that you call once the form has been submitted, you can execute the validation of the form by simply calling the "run" method and passing it the form DOM object as parameter, for example:
+**Tip**: in Vue.js you could create the following composable:
+
+    import VDFValidator from '~/assets/js/vdf-form-validator.js';
+
+    export default function()
+    {
+        onMounted(() => {
+            VDFValidator.init(process.client);
+        });
+
+        return VDFValidator;
+    }
+
+and then in your .vue file, you can simply call the composable:
+
+    const validator = useVDFValidator();
+
+and finally, call the "run" method on the "validator" object returned from the composable once you want to execute the validation.
+
+In the callback that you call once the form has been submitted, you can execute the validation of the form by simply calling the "run" method and passing it the form DOM object as parameter, for example:
 
     const result = await VDFValidator.run(e.target);
 
+You can pass a second boolean parameter that specifies whether you want to manually handle the disabling of the form's buttons (input[type=submit], button). The default value is "true". So if you want to have more control over the buttons and handle the "disabled" attribute by yourself, simply pass the boolean "false" value as the second parameter.
+Note that when this parameter is omitted or is true, the buttons will be disabled automatically only during the validation. After the validation, the buttons will become enabled again, no matters whether it failed or not.
 
-"result" will contain an object with the details of the validation result, with the following properties:
+That said, "result" will contain an object with the details of the validation result, with the following properties:
 
 - **data**: an object containing the list of fields that failed the validation and the name of the respective validator. This will be an empty object in case the validation is successful
 - **isValid**: booleans true or false, depending on whether the validation has been successful or not
