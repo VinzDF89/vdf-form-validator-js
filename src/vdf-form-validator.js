@@ -10,8 +10,13 @@ export default class VDFValidator
     static #variables = {};
     static #changed = [];
 
-    static async run(form, autoHandleButtons = true)
+    static async run(form, options)
     {
+        const {
+            autoHandleButtons = true, // Automatically disables the buttons while validating
+            silent = false // If true, the validation is made without showing the errors
+        } = options;
+
         if (autoHandleButtons) {
             VDFValidator.#disableSubmitButtons(form);
         }
@@ -30,8 +35,10 @@ export default class VDFValidator
             result.isValid = true;
         } catch (error) {
             console.log('VDFValidator: form validation failed!');
-            VDFValidator.showErrors(error.message);
-            VDFValidator.scrollToFirstErrorField(error.message);
+            if (!silent) {
+                VDFValidator.showErrors(error.message);
+                VDFValidator.scrollToFirstErrorField(error.message);
+            }
             VDFValidator.#runEvent('onFailure', form, error);
 
             result.data = JSON.parse(error.message);
@@ -316,10 +323,27 @@ export default class VDFValidator
 
     static #registerInputEvents(form)
     {
+        const validationFunction = (target) => {
+            VDFValidator.executeValidation([target])
+            .then(() => {
+                const index = VDFValidator.#changed.findIndex(item => item === target.name);
+                if (index >= 0) {
+                    VDFValidator.#changed.splice(index, 1);
+                }
+            })
+            .catch(error => {
+                VDFValidator.showErrors(error.message);
+            });
+        };
+
         const inputChangeFn = (e) => {
             const f = e.target;
             if (!VDFValidator.#changed.includes(f.name)) {
                 VDFValidator.#changed.push(f.name);
+            }
+
+            if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+                validationFunction(e.target);
             }
         };
         const inputBlurFn = (e) => {
@@ -327,16 +351,7 @@ export default class VDFValidator
                 return;
             }
 
-            VDFValidator.executeValidation([e.target])
-                .then(() => {
-                    const index = VDFValidator.#changed.findIndex(item => item === e.target.name);
-                    if (index >= 0) {
-                        VDFValidator.#changed.splice(index, 1);
-                    }
-                })
-                .catch(error => {
-                    VDFValidator.showErrors(error.message);
-                });
+            validationFunction(e.target);
         };
         [...form.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('change', inputChangeFn));
         [...form.querySelectorAll('[class*=vfield-]')].map(input => input.addEventListener('blur', inputBlurFn));

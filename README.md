@@ -55,10 +55,12 @@ and finally, call the "run" method on the "validator" object returned from the c
 
 In the callback that you call once the form has been submitted, you can execute the validation of the form by simply calling the "run" method and passing it the form DOM object as parameter, for example:
 
-    const result = await VDFValidator.run(e.target);
+    const result = await VDFValidator.run(e.target, options);
 
-You can pass a second boolean parameter that specifies whether you want to manually handle the disabling of the form's buttons (input[type=submit], button). The default value is "true". So if you want to have more control over the buttons and handle the "disabled" attribute by yourself, simply pass the boolean "false" value as the second parameter.
-Note that when this parameter is omitted or is true, the buttons will be disabled automatically only during the validation. After the validation, the buttons will become enabled again, no matters whether it failed or not.
+The second parameter is an optional object and it serves to customize a couple of options:
+- **autoHandleButtons**: it serves if you want to manually handle the disabling of the form's buttons (input[type=submit], button). The default value is "true".
+- **silent**: it serves if you want to silently validate the form. This means that even if the validation fails, you will not see errors. Useful for example if you want to disable the submit button until the fields are valid. The default value is "false".
+
 
 That said, "result" will contain an object with the details of the validation result, with the following properties:
 
