@@ -10,7 +10,7 @@ export default class VDFValidator
     static #variables = {};
     static #changed = [];
 
-    static async run(form, options)
+    static async run(form, options = {})
     {
         const {
             autoHandleButtons = true, // Automatically disables the buttons while validating
