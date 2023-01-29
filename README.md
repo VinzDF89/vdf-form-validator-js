@@ -38,7 +38,7 @@ If you are using a framework like Nuxt, and you have also the SSR to handle, the
 
     import VDFValidator from '~/assets/js/vdf-form-validator.js';
 
-    export default function()
+    export function useVDFValidator()
     {
         onMounted(() => {
             VDFValidator.init(process.client);
@@ -198,11 +198,11 @@ You can register one or more callback functions for one or more events:
 - **onFailure**
 - **onCompletion**
 
-For all of them, you can pass a parameter that will represent the form involved in the validation process.
+For all of them, you can pass a function as a parameter that will contain the logic to run. This function provides an argument representing the submit event emitted by the form, where the form can be fetched with **e.target**.
 Additional callback functions for the same event, can be defined by simply call the function again.
 For example, this is how to register a callback function in case the validation is not successful:
 
-    VDFValidator.onFailure(function(form) {
+    VDFValidator.onFailure(function(e) {
         alert('Something went wrong!');
     });
 

@@ -13,19 +13,21 @@
 
         <script src="dist/vdf-form-validator.js"></script>
         <script>
-            VDFValidator.onBeforeValidation(function(form) {
+            VDFValidator.onBeforeValidation(function(e) {
                 console.log('Before validation');
             });
 
-            VDFValidator.onValidated(function(form) {
-                console.log('On validation');
+            VDFValidator.onValidated(function(e) {
+                console.log('After validation');
+                e.preventDefault();
+                alert('The validation was OK but the form submission has been manually stopped by this custom event!');
             });
 
-            VDFValidator.onFailure(function(form, errors) {
-                console.log('On failure');
+            VDFValidator.onFailure(function(e, errors) {
+                console.log('On failure', errors);
             });
 
-            VDFValidator.onCompletion(function(form) {
+            VDFValidator.onCompletion(function(e) {
                 console.log('On completion');
             });
 

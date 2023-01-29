@@ -10,8 +10,10 @@ export default class VDFValidator
     static #variables = {};
     static #changed = [];
 
-    static async run(form, options = {})
+    static async run(e, options = {})
     {
+        const form = e.form;
+
         const {
             autoHandleButtons = true, // Automatically disables the buttons while validating
             silent = false // If true, the validation is made without showing the errors
@@ -20,7 +22,7 @@ export default class VDFValidator
         if (autoHandleButtons) {
             VDFValidator.#disableSubmitButtons(form);
         }
-        VDFValidator.#runEvent('onBeforeValidation', form);
+        VDFValidator.#runEvent('onBeforeValidation', e);
 
         const result = {
             isValid: false,
@@ -30,7 +32,7 @@ export default class VDFValidator
         try {
             await VDFValidator.executeValidation(form)
             console.log('VDFValidator: form validation succeeded!');
-            VDFValidator.#runEvent('onValidated', form);
+            VDFValidator.#runEvent('onValidated', e);
 
             result.isValid = true;
         } catch (error) {
@@ -39,14 +41,14 @@ export default class VDFValidator
                 VDFValidator.showErrors(error.message);
                 VDFValidator.scrollToFirstErrorField(error.message);
             }
-            VDFValidator.#runEvent('onFailure', form, error);
+            VDFValidator.#runEvent('onFailure', e, error);
 
             result.data = JSON.parse(error.message);
         } finally {
             if (autoHandleButtons) {
                 VDFValidator.#enableSubmitButtons(form);
             }
-            VDFValidator.#runEvent('onCompletion', form);
+            VDFValidator.#runEvent('onCompletion', e);
         }
 
         return result;
@@ -297,25 +299,24 @@ export default class VDFValidator
         smoothscroll.polyfill();
 
         const formFn = (e) => {
-            e.preventDefault();
-
             VDFValidator.#disableSubmitButtons(form);
-            VDFValidator.#runEvent('onBeforeValidation', e.target);
+            VDFValidator.#runEvent('onBeforeValidation', e);
 
             VDFValidator.executeValidation(e.target)
                 .then(() => {
                     console.log('VDFValidator: form validation succeeded!');
-                    VDFValidator.#runEvent('onValidated', e.target);
+                    VDFValidator.#runEvent('onValidated', e);
                 })
                 .catch(error => {
                     console.log('VDFValidator: form validation failed!');
                     VDFValidator.showErrors(error.message);
                     VDFValidator.scrollToFirstErrorField(error.message);
-                    VDFValidator.#runEvent('onFailure', e.target, error);
+                    VDFValidator.#runEvent('onFailure', e, error);
+                    e.preventDefault();
                 })
                 .finally(() => {
                     VDFValidator.#enableSubmitButtons(form);
-                    VDFValidator.#runEvent('onCompletion', e.target);
+                    VDFValidator.#runEvent('onCompletion', e);
                 });
         }
         form.addEventListener('submit', formFn);
