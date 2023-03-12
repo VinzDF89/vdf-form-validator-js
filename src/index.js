@@ -1,8 +1,12 @@
 import VDFValidator from './vdf-form-validator.js';
 
-window.addEventListener('load', () => {
-    //Register all forms that have .vform class
-    [...document.querySelectorAll('form.vform')].forEach(form => VDFValidator.registerForm(form));
-});
+if (typeof window !== 'undefined') {
+    console.log('VDFValidator is imported on browser');
+    window.addEventListener('load', () => {
+        console.log('VDFValidator is registering the forms');
+        //Register all forms that have .vform class
+        [...document.querySelectorAll('form.vform')].forEach(form => VDFValidator.registerForm(form));
+    });
+}
 
-export default VDFValidator = VDFValidator;
+export default VDFValidator;
