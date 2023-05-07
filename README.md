@@ -19,7 +19,14 @@ That's it! This is all you need to do in order to utilize the VDFValidator plugi
 
 If you want to utilize the plugin as a JS dependency, useful for example when it has to be imported in projects based on reactive frameworks like Vue, then these are the steps to follow:
 
-    import VDFValidator from './src/vdf-form-validator.js';
+first of all, install the dependency as a NPM package:
+
+    npm i @vinzdf89/vdf-form-validator
+
+
+then import it in your js/ts file:
+
+    import VDFValidator from '@vinzdf89/vdf-form-validator';
 
 
 then manually call the following method to initialize the plugin:
@@ -36,7 +43,7 @@ If you are using a framework like Nuxt, and you have also the SSR to handle, the
 
 **Tip**: in Vue.js you could create the following composable:
 
-    import VDFValidator from '~/assets/js/vdf-form-validator.js';
+    import VDFValidator from '@vinzdf89/vdf-form-validator';
 
     export function useVDFValidator()
     {
