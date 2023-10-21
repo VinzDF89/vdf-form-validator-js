@@ -2,16 +2,18 @@
   "name": "@vinzdf89/vdf-form-validator",
   "version": "1.0.3",
   "description": "VDF Form Validator JS",
-  "type": "module",
   "main": "src/index.js",
+  "types": "dist/types",
   "scripts": {
-    "build": "webpack & npx -p typescript tsc src/*.js --declaration --allowJs --emitDeclarationOnly"
+    "build": "webpack & npx -p typescript tsc --project tsconfig.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.17.5",
+    "@babel/plugin-transform-class-properties": "^7.22.5",
+    "@babel/plugin-transform-private-methods": "^7.22.5",
     "@babel/plugin-transform-runtime": "^7.17.0",
     "@babel/preset-env": "^7.16.11",
     "babel-loader": "^8.2.3",

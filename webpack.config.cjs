@@ -21,8 +21,8 @@ module.exports = {
               options: {
                 presets: ['@babel/preset-env'],
                 plugins: [
-                    "@babel/plugin-proposal-class-properties",
-                    "@babel/plugin-proposal-private-methods",
+                    "@babel/plugin-transform-class-properties",
+                    "@babel/plugin-transform-private-methods",
                     "@babel/plugin-transform-classes",
                     "@babel/plugin-transform-runtime"
                 ]
