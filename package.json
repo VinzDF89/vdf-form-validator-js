@@ -1,6 +1,6 @@
 {
   "name": "@vinzdf89/vdf-form-validator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "VDF Form Validator JS",
   "main": "src/index.js",
   "types": "dist/types",
